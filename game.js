@@ -1,13 +1,15 @@
-// Krashcore Blaster - version avec triangles stylisés
+// Krashcore Blaster - version avec triangles stylisés + bouton Recommencer
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = 480;
 canvas.height = 640;
 
+const startButton = document.getElementById('startButton');
+
 // Images et sons
 const bgImg = new Image();
-bgImg.src = 'https://i.imgur.com/QYpKXwC.jpg'; // image de style rétro arcade
+bgImg.src = 'https://i.imgur.com/1WQhUGp.jpeg';
 const explosionImg = new Image();
 explosionImg.src = 'https://i.imgur.com/4fjVAOl.png';
 
@@ -78,7 +80,14 @@ function drawEnemy(e) {
 }
 
 function updateGame() {
-  if (gameOver) return;
+  if (gameOver) {
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText("Game Over", canvas.width / 2 - 50, canvas.height / 2);
+    startButton.textContent = "Recommencer";
+    startButton.style.display = 'block';
+    return;
+  }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
@@ -141,14 +150,13 @@ function updateGame() {
   ctx.fillText(`Best: ${bestScore}`, 10, 40);
   ctx.fillText(`Lives: ${lives}`, 10, 60);
 
-  if (!gameOver) requestAnimationFrame(updateGame);
-  else ctx.fillText("Game Over", canvas.width / 2 - 40, canvas.height / 2);
+  requestAnimationFrame(updateGame);
 }
 
 function keyHandler(e) {
   if (e.key === 'ArrowLeft' && player.x - player.width / 2 > 0) player.x -= player.speed;
   if (e.key === 'ArrowRight' && player.x + player.width / 2 < canvas.width) player.x += player.speed;
-  if (e.key === ' ' || e.key === 'ArrowUp') {
+  if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
     shootSound.play();
     player.bullets.push({ x: player.x - 2, y: player.y });
   }
@@ -156,9 +164,10 @@ function keyHandler(e) {
 
 document.addEventListener('keydown', keyHandler);
 
-// Démarrer le jeu
-document.getElementById('startButton').addEventListener('click', () => {
-  // Réinitialisation complète
+startButton.addEventListener('click', () => {
+  startButton.style.display = 'none';
+
+  // Reset du jeu
   score = 0;
   lives = 3;
   enemySpeed = 1;
@@ -167,6 +176,9 @@ document.getElementById('startButton').addEventListener('click', () => {
   player.bullets.length = 0;
   explosions.length = 0;
   gameOver = false;
+
+  player.x = canvas.width / 2;
+  player.y = canvas.height - 60;
 
   createEnemyWave();
   updateGame();
