@@ -7,7 +7,7 @@ canvas.height = 640;
 
 // Images et sons
 const bgImg = new Image();
-bgImg.src = 'https://i.imgur.com/Ea3Wk9o.jpg';
+bgImg.src = 'https://i.imgur.com/QYpKXwC.jpg'; // image de style rétro arcade
 const explosionImg = new Image();
 explosionImg.src = 'https://i.imgur.com/4fjVAOl.png';
 
