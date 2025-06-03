@@ -157,5 +157,17 @@ function keyHandler(e) {
 document.addEventListener('keydown', keyHandler);
 
 // Démarrer le jeu
-// createEnemyWave();
-// updateGame();
+document.getElementById('startButton').addEventListener('click', () => {
+  // Réinitialisation complète
+  score = 0;
+  lives = 3;
+  enemySpeed = 1;
+  waveTimer = 0;
+  enemies.length = 0;
+  player.bullets.length = 0;
+  explosions.length = 0;
+  gameOver = false;
+
+  createEnemyWave();
+  updateGame();
+});
