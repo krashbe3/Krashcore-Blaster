@@ -1,18 +1,11 @@
-// Krashcore Blaster - version avec triangles stylisés + bouton Recommencer
+// Krashcore Blaster - version avec triangles stylisés, fond dégradé et ennemis qui descendent
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = 480;
 canvas.height = 640;
 
-const startButton = document.getElementById('startButton');
-
-// Images et sons
-const bgImg = new Image();
-bgImg.src = 'https://i.imgur.com/1WQhUGp.jpeg';
-const explosionImg = new Image();
-explosionImg.src = 'https://i.imgur.com/4fjVAOl.png';
-
+// Sons
 const shootSound = new Audio('https://freesound.org/data/previews/341/341695_3248244-lq.mp3');
 const explosionSound = new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3');
 
@@ -57,13 +50,22 @@ function createEnemyWave() {
 }
 
 function drawBackground() {
-  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  // Fond dégradé vertical bleu très foncé à noir
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, '#000022');
+  gradient.addColorStop(1, '#000000');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawExplosions() {
   for (let i = explosions.length - 1; i >= 0; i--) {
     const e = explosions[i];
-    ctx.drawImage(explosionImg, e.x, e.y, 40, 40);
+    // Effet simple avec un cercle blanc brillant qui diminue
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${e.timer / 10})`;
+    ctx.arc(e.x + 20, e.y + 20, 20 - e.timer * 2, 0, 2 * Math.PI);
+    ctx.fill();
     e.timer--;
     if (e.timer <= 0) explosions.splice(i, 1);
   }
@@ -80,14 +82,7 @@ function drawEnemy(e) {
 }
 
 function updateGame() {
-  if (gameOver) {
-    ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
-    ctx.fillText("Game Over", canvas.width / 2 - 50, canvas.height / 2);
-    startButton.textContent = "Recommencer";
-    startButton.style.display = 'block';
-    return;
-  }
+  if (gameOver) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
@@ -107,8 +102,16 @@ function updateGame() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     e.x += e.dir * enemySpeed;
-    if (e.x <= 20 || e.x >= canvas.width - 20) e.dir *= -1;
+
+    // Quand ils touchent les bords, ils changent de direction ET descendent un peu
+    if (e.x <= 20 || e.x >= canvas.width - 20) {
+      e.dir *= -1;
+      e.y += 10; // Descente de 10px à chaque changement de direction
+    }
+
     drawEnemy(e);
+
+    // Vérifie s'ils atteignent la ligne du joueur (bas)
     if (e.y + e.height >= canvas.height) {
       enemies.splice(i, 1);
       lives--;
@@ -121,7 +124,12 @@ function updateGame() {
     const e = enemies[i];
     for (let j = player.bullets.length - 1; j >= 0; j--) {
       const b = player.bullets[j];
-      if (b.x < e.x + e.width / 2 && b.x + 4 > e.x - e.width / 2 && b.y < e.y + e.height && b.y + 10 > e.y) {
+      if (
+        b.x < e.x + e.width / 2 &&
+        b.x + 4 > e.x - e.width / 2 &&
+        b.y < e.y + e.height &&
+        b.y + 10 > e.y
+      ) {
         explosionSound.play();
         explosions.push({ x: e.x - 20, y: e.y, timer: 10 });
         enemies.splice(i, 1);
@@ -150,13 +158,14 @@ function updateGame() {
   ctx.fillText(`Best: ${bestScore}`, 10, 40);
   ctx.fillText(`Lives: ${lives}`, 10, 60);
 
-  requestAnimationFrame(updateGame);
+  if (!gameOver) requestAnimationFrame(updateGame);
+  else ctx.fillText('Game Over', canvas.width / 2 - 40, canvas.height / 2);
 }
 
 function keyHandler(e) {
   if (e.key === 'ArrowLeft' && player.x - player.width / 2 > 0) player.x -= player.speed;
   if (e.key === 'ArrowRight' && player.x + player.width / 2 < canvas.width) player.x += player.speed;
-  if ((e.key === ' ' || e.key === 'ArrowUp') && !gameOver) {
+  if (e.key === ' ' || e.key === 'ArrowUp') {
     shootSound.play();
     player.bullets.push({ x: player.x - 2, y: player.y });
   }
@@ -164,22 +173,6 @@ function keyHandler(e) {
 
 document.addEventListener('keydown', keyHandler);
 
-startButton.addEventListener('click', () => {
-  startButton.style.display = 'none';
-
-  // Reset du jeu
-  score = 0;
-  lives = 3;
-  enemySpeed = 1;
-  waveTimer = 0;
-  enemies.length = 0;
-  player.bullets.length = 0;
-  explosions.length = 0;
-  gameOver = false;
-
-  player.x = canvas.width / 2;
-  player.y = canvas.height - 60;
-
-  createEnemyWave();
-  updateGame();
-});
+// Démarrer le jeu
+createEnemyWave();
+updateGame();
