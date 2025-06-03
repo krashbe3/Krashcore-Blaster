@@ -1,35 +1,41 @@
-body {
-  margin: 0;
+.screen {
+  color: white;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
   background: #000011;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  font-family: 'Arial', sans-serif;
-  color: white;
-  user-select: none;
+  align-items: center;
+  padding: 0 20px;
 }
 
-canvas {
-  border: 2px solid #0ff;
-  background: linear-gradient(to bottom, #000022, #000000);
-  display: block;
+.screen h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
 }
 
-#startBtn {
-  margin-top: 15px;
-  padding: 10px 20px;
+.screen ul {
+  text-align: left;
+  max-width: 320px;
+  margin-bottom: 20px;
   font-size: 18px;
+  line-height: 1.4;
+}
+
+.screen button {
+  padding: 12px 30px;
+  font-size: 22px;
   cursor: pointer;
   background-color: #00ffff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   color: #000;
   font-weight: bold;
   transition: background-color 0.3s;
 }
 
-#startBtn:hover {
+.screen button:hover {
   background-color: #00cccc;
 }
