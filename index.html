@@ -1,32 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Krashcore Blaster</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: black;
+      text-align: center;
+      margin: 0;
+      color: white;
+      font-family: 'Arial', sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #00ffff;
+      background: black;
+    }
+    #startButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #00ffff;
+      color: black;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <div id="start-screen">
-    <h1>Krashcore Blaster</h1>
-    <p>Règles :<br>Déplace-toi avec les flèches ou ZQSD.<br>Tire avec la barre espace.<br>Évite ou détruis les ennemis et leurs projectiles.<br>Tu as 3 vies. Bonne chance !</p>
-    <button onclick="startGame()">Commencer</button>
-  </div>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <div id="game-over-screen" style="display:none;">
-    <h1>Game Over</h1>
-    <p id="final-score"></p>
-    <button onclick="location.reload()">Rejouer</button>
-  </div>
-  <audio id="bgm" loop>
-    <source src="assets/audio/music.mp3" type="audio/mp3">
-  </audio>
-  <audio id="shoot-sound">
-    <source src="assets/audio/shoot.wav" type="audio/wav">
-  </audio>
-  <audio id="explosion-sound">
-    <source src="assets/audio/explosion.wav" type="audio/wav">
-  </audio>
+  <h1>Krashcore Blaster</h1>
+  <button id="startButton">Commencer</button>
+  <canvas id="gameCanvas"></canvas>
+
   <script src="game.js"></script>
 </body>
 </html>
