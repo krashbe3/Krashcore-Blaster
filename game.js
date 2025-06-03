@@ -1,20 +1,19 @@
-// Krashcore Blaster - version avec triangles stylisés, fond dégradé et ennemis qui descendent
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = 480;
 canvas.height = 640;
 
-// Sons
+// Sons (tu peux changer les liens si besoin)
 const shootSound = new Audio('https://freesound.org/data/previews/341/341695_3248244-lq.mp3');
 const explosionSound = new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3');
+const enemyShootSound = new Audio('https://freesound.org/data/previews/146/146725_2615117-lq.mp3');
 
 let score = 0;
 let bestScore = localStorage.getItem('krashcoreBest') || 0;
 let lives = 3;
 let gameOver = false;
 let enemySpeed = 1;
-let waveTimer = 0;
+let difficultyTimer = 0;
 
 const player = {
   x: canvas.width / 2,
@@ -35,22 +34,23 @@ const player = {
 };
 
 const enemies = [];
+const enemyBullets = [];
 const explosions = [];
 
 function createEnemyWave() {
-  for (let i = 0; i < 5; i++) {
+  enemies.length = 0; // reset
+  for (let i = 0; i < 8; i++) {
     enemies.push({
-      x: i * 90 + 45,
-      y: 20,
+      x: 50 + i * 50,
+      y: 0,
       width: 30,
       height: 40,
-      dir: 1
+      speed: enemySpeed
     });
   }
 }
 
 function drawBackground() {
-  // Fond dégradé vertical bleu très foncé à noir
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
   gradient.addColorStop(0, '#000022');
   gradient.addColorStop(1, '#000000');
@@ -61,7 +61,6 @@ function drawBackground() {
 function drawExplosions() {
   for (let i = explosions.length - 1; i >= 0; i--) {
     const e = explosions[i];
-    // Effet simple avec un cercle blanc brillant qui diminue
     ctx.beginPath();
     ctx.fillStyle = `rgba(255,255,255,${e.timer / 10})`;
     ctx.arc(e.x + 20, e.y + 20, 20 - e.timer * 2, 0, 2 * Math.PI);
@@ -82,14 +81,21 @@ function drawEnemy(e) {
 }
 
 function updateGame() {
-  if (gameOver) return;
+  if (gameOver) {
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2);
+    ctx.font = '16px Arial';
+    ctx.fillText('Appuie sur "Commencer" pour rejouer', canvas.width / 2 - 120, canvas.height / 2 + 30);
+    return;
+  }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
   player.draw();
   drawExplosions();
 
-  // Bullets
+  // Mouvements et dessins des balles du joueur
   for (let i = player.bullets.length - 1; i >= 0; i--) {
     const b = player.bullets[i];
     b.y -= 8;
@@ -98,28 +104,36 @@ function updateGame() {
     if (b.y < 0) player.bullets.splice(i, 1);
   }
 
-  // Enemies
+  // Mouvements ennemis + tir aléatoire + collision avec bas écran
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
-    e.x += e.dir * enemySpeed;
+    e.y += e.speed;
 
-    // Quand ils touchent les bords, ils changent de direction ET descendent un peu
-    if (e.x <= 20 || e.x >= canvas.width - 20) {
-      e.dir *= -1;
-      e.y += 10; // Descente de 10px à chaque changement de direction
+    // Tir aléatoire (1 chance sur 100 par frame)
+    if (Math.random() < 0.01) {
+      enemyBullets.push({ x: e.x, y: e.y + e.height, width: 4, height: 10, speed: 5 });
+      enemyShootSound.play();
     }
 
-    drawEnemy(e);
-
-    // Vérifie s'ils atteignent la ligne du joueur (bas)
     if (e.y + e.height >= canvas.height) {
       enemies.splice(i, 1);
       lives--;
       if (lives <= 0) gameOver = true;
     }
+
+    drawEnemy(e);
   }
 
-  // Collisions
+  // Mouvements et dessin balles ennemies
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const b = enemyBullets[i];
+    b.y += b.speed;
+    ctx.fillStyle = 'red';
+    ctx.fillRect(b.x, b.y, b.width, b.height);
+    if (b.y > canvas.height) enemyBullets.splice(i, 1);
+  }
+
+  // Collisions balles joueur <-> ennemis
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
     for (let j = player.bullets.length - 1; j >= 0; j--) {
@@ -144,25 +158,47 @@ function updateGame() {
     }
   }
 
-  // Waves
-  waveTimer++;
-  if (waveTimer > 180) {
-    createEnemyWave();
-    enemySpeed += 0.2;
-    waveTimer = 0;
+  // Collisions balles ennemies <-> joueur
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const b = enemyBullets[i];
+    if (
+      b.x < player.x + player.width / 2 &&
+      b.x + b.width > player.x - player.width / 2 &&
+      b.y + b.height > player.y &&
+      b.y < player.y + player.height
+    ) {
+      enemyBullets.splice(i, 1);
+      lives--;
+      if (lives <= 0) gameOver = true;
+      explosionSound.play();
+    }
   }
 
+  // Augmente la vitesse toutes les 30 secondes (1800 frames environ à 60fps)
+  difficultyTimer++;
+  if (difficultyTimer > 1800) {
+    enemySpeed += 0.5;
+    enemies.forEach(e => e.speed = enemySpeed);
+    difficultyTimer = 0;
+  }
+
+  // Si plus d'ennemis, recrée une vague
+  if (enemies.length === 0) {
+    createEnemyWave();
+  }
+
+  // Affichage HUD
   ctx.fillStyle = 'white';
   ctx.font = '16px Arial';
   ctx.fillText(`Score: ${score}`, 10, 20);
   ctx.fillText(`Best: ${bestScore}`, 10, 40);
   ctx.fillText(`Lives: ${lives}`, 10, 60);
 
-  if (!gameOver) requestAnimationFrame(updateGame);
-  else ctx.fillText('Game Over', canvas.width / 2 - 40, canvas.height / 2);
+  requestAnimationFrame(updateGame);
 }
 
 function keyHandler(e) {
+  if (gameOver) return;
   if (e.key === 'ArrowLeft' && player.x - player.width / 2 > 0) player.x -= player.speed;
   if (e.key === 'ArrowRight' && player.x + player.width / 2 < canvas.width) player.x += player.speed;
   if (e.key === ' ' || e.key === 'ArrowUp') {
@@ -173,6 +209,19 @@ function keyHandler(e) {
 
 document.addEventListener('keydown', keyHandler);
 
-// Démarrer le jeu
-createEnemyWave();
-updateGame();
+// Fonction pour reset le jeu
+function resetGame() {
+  score = 0;
+  lives = 3;
+  gameOver = false;
+  enemySpeed = 1;
+  difficultyTimer = 0;
+  player.bullets = [];
+  enemyBullets.length = 0;
+  explosions.length = 0;
+  createEnemyWave();
+  updateGame();
+}
+
+// Expose resetGame pour le bouton "Commencer/Recommencer"
+window.resetGame = resetGame;
