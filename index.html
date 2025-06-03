@@ -7,10 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+  <div id="startScreen" class="screen">
+    <h1>Krashcore Blaster</h1>
+    <p>Règles :</p>
+    <ul>
+      <li>Déplace-toi avec les flèches gauche/droite</li>
+      <li>Tire avec la barre espace ou flèche haut</li>
+      <li>Évite les tirs ennemis et ne laisse pas les ennemis atteindre le bas</li>
+      <li>Tu as 3 vies</li>
+      <li>Bonne chance !</li>
+    </ul>
+    <button id="startBtn">Commencer</button>
+  </div>
 
-  <!-- Bouton pour démarrer ou recommencer le jeu -->
-  <button id="startBtn">Commencer</button>
+  <canvas id="gameCanvas" style="display:none;"></canvas>
 
   <script src="game.js"></script>
 </body>
