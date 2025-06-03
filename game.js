@@ -157,5 +157,5 @@ function keyHandler(e) {
 document.addEventListener('keydown', keyHandler);
 
 // Démarrer le jeu
-createEnemyWave();
-updateGame();
+// createEnemyWave();
+// updateGame();
