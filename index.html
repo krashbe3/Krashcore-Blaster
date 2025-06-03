@@ -2,36 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Krashcore Blaster</title>
-  <style>
-    body {
-      background: black;
-      text-align: center;
-      margin: 0;
-      color: white;
-      font-family: 'Arial', sans-serif;
-    }
-    canvas {
-      display: block;
-      margin: 20px auto;
-      border: 2px solid #00ffff;
-      background: black;
-    }
-    #startButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #00ffff;
-      color: black;
-      border: none;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Krashcore Blaster</h1>
-  <button id="startButton">Commencer</button>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Bouton pour démarrer ou recommencer le jeu -->
+  <button id="startBtn">Commencer</button>
 
   <script src="game.js"></script>
 </body>
